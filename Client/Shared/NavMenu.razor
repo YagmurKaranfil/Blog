@@ -1,0 +1,116 @@
+﻿@using Blog.Client.Services;
+@inject NavigationManager NavigationManager
+@inject IBlogService blogPostService
+
+@*Blazor uygulamaları için bir yazı yazma veya otomatik tamamlama işlevi sağlayan üçüncü taraf bir kitaplıktır. Kullanıcıların bir giriş
+alanına metin girmesine olanak tanır ve genellikle bir veri kaynağından getirilen girilen metne dayalı olarak önerileri veya tamamlamaları görüntüler.*@
+
+@using Blazored.Typeahead;
+@using Blog.Shared;
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#"><i class="oi oi-book"></i> MyBlog</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarScroll">
+            <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
+                <li >
+                   <div class="nav-item px-3">
+                       <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                           <span class="oi oi-home" aria-hidden="true"></span>Home
+                       </NavLink>
+                   </div>
+                </li>
+                <li>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="create" Match="NavLinkMatch.All">
+                            <span class="oi oi-plus" aria-hidden="true"></span>Create Post
+                        </NavLink>
+                    </div>
+                </li>
+            </ul>
+           <div class="w-25">
+@*
+ SearchMethod="@SearchBlog": SearchBlog adında bir metoda referans veriyor. Bu metod, kullanıcının metin girdiğinde çalışacak ve ilgili önerileri alacak.
+
+Value="selectedBlog": selectedBlog adlı bir değişkeni bağlar. Bu değişken, seçilen blog gönderisini temsil eder.
+
+TValue="BlogPost" TItem="BlogPost": BlogPost türünü, bileşende kullanılacak değer ve öğe türünü belirtir.
+
+ValueChanged="HandleSearch": HandleSearch adında bir yönteme referans verir. Bu yöntem, değer değiştiğinde çağrılır ve seçilen blog gönderisini işler.
+
+ValueExpression="@(()=>selectedBlog)": selectedBlog değişkenini ifade eder. Bu, seçilen blog gönderisi değerini bağlamak için kullanılır.
+
+placeholder="Search...": Metin girdi kutusuna yer tutucu metni ekler. Kullanıcıya "Ara..." olarak gösterilecektir.
+
+<SelectedTemplate>: Seçilen öğe için bir şablon tanımlar. Burada, seçilen blog gönderisinin başlığını gösteriyor.
+
+<ResultTemplate>: Önerilen öğelerin gösterileceği şablonu tanımlar. Burada, önerilen blog gönderilerinin başlıklarını gösteriyor.
+
+<NotFoundTemplate>: Arama sonucunda hiçbir blog gönderisi bulunamazsa gösterilecek olan şablonu tanımlar. Burada, "Üzgünüz, hiçbir blog bulunamadı." mesajını gösteriyor.
+*@
+
+               <BlazoredTypeahead SearchMethod="@SearchBlog" Value="selectedBlog" TValue="BlogPost" TItem="BlogPost" ValueChanged="HandleSearch"
+               ValueExpression="@(()=>selectedBlog)" placeholder="Search...">
+               <SelectedTemplate>
+               @context.Title
+               </SelectedTemplate>
+               <ResultTemplate>
+                 @context.Title
+               </ResultTemplate>
+               <NotFoundTemplate>
+                   Sorry there weren't any blog found.
+               </NotFoundTemplate>
+
+               </BlazoredTypeahead>
+           </div>
+        </div>
+    </div>
+</nav>
+
+@code{
+   // private bool collapseNavMenu = true;: collapseNavMenu adında bir boolean değişken tanımlar ve başlangıçta true olarak ayarlanır.
+//    Bu değişken, gezinme menüsünün daraltılıp daraltılmayacağını belirlemek için kullanılır.
+
+//private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;: NavMenuCssClass adında bir nullable string döndüren bir özellik (property)
+//tanımlar. Bu özellik, gezinme menüsünün CSS sınıfını belirler. Eğer collapseNavMenu true ise "collapse" sınıfı atanır, aksi takdirde null
+//değeri döndürülür.
+
+//private void ToggleNavMenu(): ToggleNavMenu adında bir yöntem (method) tanımlar. Bu yöntem, gezinme menüsünün durumunu tersine çevirir.
+//collapseNavMenu değişkeninin değeri değiştirilerek gezinme menüsünün daraltılıp genişletilmesi sağlanır.
+
+//private BlogPost selectedBlog;: selectedBlog adında bir BlogPost türünde değişken tanımlar. Bu değişken, seçilen blog gönderisini temsil eder.
+
+//private async Task<IEnumerable<BlogPost>> SearchBlog(string searchText): SearchBlog adında bir asenkron yöntem tanımlar. Bu yöntem, verilen
+//searchText parametresine dayalı olarak blog gönderilerini arayan bir hizmeti (blogPostService) çağırır ve sonucu IEnumerable<BlogPost> 
+//olarak döndürür.
+
+//private void HandleSearch(BlogPost blogPost): HandleSearch adında bir yöntem tanımlar. Bu yöntem, seçilen bir blog gönderisini işler.
+//Eğer blogPost null değilse, selectedBlog değişkenine blogPost değerini atar ve NavigationManager.NavigateTo yöntemini kullanarak seçilen
+//blog gönderisinin URL'sine yönlendirme yapar.
+    private bool collapseNavMenu = true;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+
+    private BlogPost selectedBlog;
+
+    private async Task<IEnumerable<BlogPost>> SearchBlog(string searchText)
+    {
+        var response = await blogPostService.SearchBlogs(searchText);
+        return response;
+    }
+
+    private void HandleSearch(BlogPost blogPost)
+    {
+        if (blogPost == null) return;
+        selectedBlog = blogPost;
+        NavigationManager.NavigateTo($"postblog/{selectedBlog.Url}", true);
+    }
+}

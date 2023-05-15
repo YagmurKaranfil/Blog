@@ -1,0 +1,11 @@
+﻿@inherits  Microsoft.AspNetCore.Components.Forms.InputTextArea
+
+@*@attributes="AdditionalAttributes" ifadesi, AdditionalAttributes adlı bir değişkenin kullanılarak bileşene ek özniteliklerin geçirilmesini sağlar. 
+Bu şekilde, bileşenin HTML çıktısına özel öznitelikler ekleyebilirsiniz.
+class="@CssClass" ifadesi, bileşenin CSS sınıflarını tanımlamak için CssClass adlı bir değişkenin kullanılacağını belirtir.
+@bind="@CurrentValueAsString" ifadesi, bileşenin CurrentValueAsString adlı özelliğini veri bağlamasına (@bind) ekler. Bu sayede, 
+CurrentValueAsString özelliğiyle veri değişikliklerini iki yönlü olarak senkronize edebilirsiniz.
+@bind:event="oninput" ifadesi, veri bağlamasının hangi olaya (oninput) bağlı olduğunu belirtir. Bu durumda, kullanıcının textarea'ya girdiği
+herhangi bir değer değişikliği CurrentValueAsString özelliğine yansıyacaktır.*@
+
+<textarea @attributes="AdditionalAttributes" class="@CssClass" @bind="@CurrentValueAsString" @bind:event="oninput"></textarea>
